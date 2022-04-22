@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/hatlonely/go-kit/bind"
 	"github.com/hatlonely/go-kit/config"
 	"github.com/hatlonely/go-kit/flag"
@@ -12,7 +12,6 @@ import (
 	"github.com/realwrtoff/go-file-writer/internal/handler"
 	"github.com/realwrtoff/go-file-writer/internal/parser"
 	"github.com/realwrtoff/go-file-writer/internal/reader"
-	"github.com/realwrtoff/go-file-writer/internal/scheduler"
 	"github.com/realwrtoff/go-file-writer/internal/writer"
 	"os"
 	"os/signal"
@@ -29,9 +28,9 @@ type Options struct {
 	FilePath string `flag:"--path; usage: 文件路径; default: ./data"`
 	Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
 	Num      int    `flag:"--num; usage: 并发数; default: 10"`
-	Redis    struct {
-		Addr     string `flag:"usage: redis addr"`
-		Password string `flag:"usage: redis password"`
+
+	Pulsar    struct {
+		URL string `flag:"usage: pulsar url"`
 	}
 	Logger struct {
 		Run logger.Options
@@ -64,31 +63,20 @@ func main() {
 		panic(err)
 	}
 
-	rds := redis.NewClient(&redis.Options{
-		Addr:         options.Redis.Addr,
-		Password:     options.Redis.Password,
-		MaxRetries:   3,
-		MinIdleConns: 1,
-		PoolSize:     options.Num,
-	})
-	if _, err := rds.Ping().Result(); err != nil {
-		panic(err)
-	}
-	runLog.Infof("ping redis %v ok\n", options.Redis.Addr)
-
 	ctx, cancel := context.WithCancel(context.Background())
 
-	watcher := scheduler.NewWatcher(rds)
-	go watcher.Run(ctx)
-
-	var wg sync.WaitGroup //定义一个同步等待的组
+	//定义一个同步等待的组
+	var wg sync.WaitGroup
 	for i := 0; i < options.Num; i++ {
 		index := options.Offset + i
-		queue := fmt.Sprintf("%s:%d", options.RunType, index)
-		publisher := reader.NewRdsReader(queue, rds, runLog)
+		client, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL})
+		if err != nil {
+			panic(err)
+		}
+		topic := fmt.Sprintf("%s:%d", options.RunType, index)
+		publisher := reader.NewPulsarReader(topic, client, runLog)
 		analyzer := parser.NewParser(options.RunType, runLog)
-		filePrefix := fmt.Sprintf("%s/%s/%d_", options.FilePath, options.RunType, index)
-		subscriber := writer.NewFileWriter(filePrefix, runLog)
+		subscriber := writer.NewFileWriter(options.FilePath, runLog)
 		hd := handler.NewFrameHandler(index, options.RunType, publisher, analyzer, subscriber, runLog)
 		wg.Add(1)
 		go hd.Run(&wg, ctx)
@@ -102,6 +90,5 @@ func main() {
 
 	cancel()
 	wg.Wait()
-	_ = rds.Close()
 	_ = runLog.Close()
 }

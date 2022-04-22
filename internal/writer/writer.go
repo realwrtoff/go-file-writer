@@ -7,8 +7,9 @@ import (
 )
 
 type InterfaceWriter interface {
-	Write(fileName string, array []string) (err error)
-	WriteLine(fileName, array []string) (err error)
+	GetFileName([] string) string
+	Write([]string, []string) error
+	WriteLine(string, []string) error
 	Close()
 }
 
@@ -33,10 +34,24 @@ func NewFileWriter(
 	}
 }
 
-func (w *FileWriter) Write(fileName string, array []string) (err error) {
-	if len(array) == 0 {
+func (w *FileWriter) GetFileName(arrays[] string) string {
+	if len(arrays) == 0 {
+		return w.filePath
+	}
+	fileName := w.filePath
+	for _, k := range arrays {
+		fileName += k
+		fileName += "_"
+	}
+	fileName = fileName[:len(fileName)-1] + ".txt"
+	return fileName
+}
+
+func (w *FileWriter) Write(keyArray []string, buffArray []string) (err error) {
+	if len(buffArray) == 0 {
 		return nil
 	}
+	fileName := w.GetFileName(keyArray)
 	if _, ok := w.wfps[fileName]; !ok {
 		file, err := os.OpenFile(fileName, os.O_APPEND, 0666)
 		if err != nil {
@@ -46,7 +61,7 @@ func (w *FileWriter) Write(fileName string, array []string) (err error) {
 		w.files[fileName] = file
 		w.wfps[fileName] = wfp
 	}
-	return w.WriteLine(fileName, array)
+	return w.WriteLine(fileName, buffArray)
 }
 
 func (w *FileWriter) WriteLine(fileName string, array []string) (err error) {

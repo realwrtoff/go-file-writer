@@ -6,7 +6,8 @@ import (
 )
 
 type InterfaceReader interface {
-	ReadLine() string
+	ReadLine() (string, error)
+	Close()
 }
 
 type RdsReader struct {
@@ -29,4 +30,8 @@ func NewRdsReader(
 
 func (r *RdsReader) ReadLine() (string, error) {
 	return r.rds.LPop(r.queue).Result()
+}
+
+func (r *RdsReader) Close() {
+	// rds 在外面关闭
 }

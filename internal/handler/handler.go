@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
-	"github.com/go-redis/redis"
 	"github.com/hatlonely/go-kit/logger"
 	"github.com/realwrtoff/go-file-writer/internal/parser"
 	"github.com/realwrtoff/go-file-writer/internal/reader"
@@ -11,33 +9,25 @@ import (
 	"sync"
 )
 
-type Frame struct {
+type FrameHandler struct {
 	index      int
 	runType    string
-	filePath   string
-	rds        *redis.Client
-	publisher  *reader.RdsReader
-	analyzer   *parser.Parser
-	subscriber *writer.FileWriter
+	publisher  reader.InterfaceReader
+	analyzer   parser.InterfaceParser
+	subscriber writer.InterfaceWriter
 	runLog     *logger.Logger
 }
 
-func NewFrame(
+func NewFrameHandler(
 	index int,
 	runType string,
-	filePath string,
-	rds *redis.Client,
-	runLog *logger.Logger) *Frame {
-	queue := fmt.Sprintf("%s:%d", runType, index)
-	publisher := reader.NewRdsReader(queue, rds, runLog)
-	analyzer := parser.NewParser(runType, runLog)
-	filePrefix := fmt.Sprintf("%s/%s_%d", filePath, runType, index)
-	subscriber := writer.NewFileWriter(filePrefix, runLog)
-	return &Frame{
+	publisher  reader.InterfaceReader,
+	analyzer   parser.InterfaceParser,
+	subscriber writer.InterfaceWriter,
+	runLog *logger.Logger) *FrameHandler {
+	return &FrameHandler{
 		index:      index,
 		runType:    runType,
-		filePath:   filePath,
-		rds:        rds,
 		publisher:  publisher,
 		analyzer:   analyzer,
 		subscriber: subscriber,
@@ -45,12 +35,15 @@ func NewFrame(
 	}
 }
 
-func (f *Frame) Run(wg *sync.WaitGroup, ctx context.Context) {
+func (f *FrameHandler) Run(wg *sync.WaitGroup, ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			wg.Done()
+			f.publisher.Close()
+			f.analyzer.Close()
+			f.subscriber.Close()
 			f.runLog.Infof("hander[%s][%d] exit...\n", f.runType, f.index)
+			wg.Done()
 			return
 		default:
 		}
@@ -61,13 +54,12 @@ func (f *Frame) Run(wg *sync.WaitGroup, ctx context.Context) {
 			// time.Sleep(time.Second)
 			continue
 		}
-		key, array, err := f.analyzer.Parse(line)
+		keyArray, buffArray, err := f.analyzer.Parse(line)
 		if err != nil {
 			f.runLog.Error(err.Error())
 			continue
 		}
-		fileName := fmt.Sprintf("%s_%s.txt", key)
-		err = f.subscriber.Write(fileName, array)
+		err = f.subscriber.Write(keyArray, buffArray)
 		if err != nil {
 			f.runLog.Error(err.Error())
 			// continue

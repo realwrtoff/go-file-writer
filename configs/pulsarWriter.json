@@ -1,0 +1,16 @@
+{
+    "type": "tuvssh",
+    "path": "./data",
+    "offset": 0,
+    "num": 10,
+    "pulsar": {
+        "url": "pulsar://localhost:6650"
+    },
+    "logger": {
+        "run": {
+            "formatter": "text",
+            "filename": "log/runlog",
+            "maxAge": "24h"
+        }
+    }
+}

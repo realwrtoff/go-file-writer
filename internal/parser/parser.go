@@ -6,7 +6,8 @@ import (
 )
 
 type InterfaceParser interface {
-	Parse(line string) (key string, array []string, err error)
+	Parse(string) ([]string, []string, error)
+	Close()
 }
 
 type Parser struct {
@@ -24,10 +25,14 @@ func NewParser(
 	}
 }
 
-func (p *Parser) Parse(line string) (key string, array []string, err error) {
+func (p *Parser) Parse(line string) (keyArray []string, buffArray []string, err error) {
 	if p.fileType == "tuvssh" {
-		array = strings.Split(line, "\t")
-		key = array[1]
+		buffArray = strings.Split(line, "\t")
+		keyArray = append(keyArray, buffArray[0], buffArray[1], buffArray[2])
 	}
 	return
+}
+
+func (p *Parser) Close() {
+
 }
