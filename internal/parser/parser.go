@@ -1,10 +1,9 @@
 package parser
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/hatlonely/go-kit/logger"
 	"strings"
 )
-
 
 type InterfaceParser interface {
 	Parse(line string) (key string, array []string, err error)
@@ -12,12 +11,12 @@ type InterfaceParser interface {
 
 type Parser struct {
 	fileType string
-	runLog *logrus.Logger
+	runLog   *logger.Logger
 }
 
 func NewParser(
 	fileType string,
-	runLog *logrus.Logger,
+	runLog *logger.Logger,
 ) *Parser {
 	return &Parser{
 		fileType: fileType,
@@ -25,7 +24,7 @@ func NewParser(
 	}
 }
 
-func (p *Parser)Parse(line string)(key string, array []string, err error)  {
+func (p *Parser) Parse(line string) (key string, array []string, err error) {
 	if p.fileType == "tuvssh" {
 		array = strings.Split(line, "\t")
 		key = array[1]

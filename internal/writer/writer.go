@@ -2,7 +2,7 @@ package writer
 
 import (
 	"bufio"
-	"github.com/sirupsen/logrus"
+	"github.com/hatlonely/go-kit/logger"
 	"os"
 )
 
@@ -14,26 +14,26 @@ type InterfaceWriter interface {
 
 type FileWriter struct {
 	filePath string
-	files     map[string]*os.File
-	wfps      map[string]*bufio.Writer
-	runLog *logrus.Logger
+	files    map[string]*os.File
+	wfps     map[string]*bufio.Writer
+	runLog   *logger.Logger
 }
 
 func NewFileWriter(
 	filePath string,
-	runLog *logrus.Logger,
+	runLog *logger.Logger,
 ) *FileWriter {
 	files := make(map[string]*os.File)
 	wfps := make(map[string]*bufio.Writer)
 	return &FileWriter{
 		filePath: filePath,
-		files: files,
-		wfps: wfps,
+		files:    files,
+		wfps:     wfps,
 		runLog:   runLog,
 	}
 }
 
-func (w *FileWriter)Write(fileName string, array []string) (err error) {
+func (w *FileWriter) Write(fileName string, array []string) (err error) {
 	if len(array) == 0 {
 		return nil
 	}
@@ -49,7 +49,7 @@ func (w *FileWriter)Write(fileName string, array []string) (err error) {
 	return w.WriteLine(fileName, array)
 }
 
-func (w *FileWriter)WriteLine(fileName string, array []string) (err error) {
+func (w *FileWriter) WriteLine(fileName string, array []string) (err error) {
 	for _, s := range array {
 		_, _ = w.wfps[fileName].WriteString(s)
 		_, _ = w.wfps[fileName].WriteString("\t")
@@ -58,7 +58,7 @@ func (w *FileWriter)WriteLine(fileName string, array []string) (err error) {
 	return
 }
 
-func (w *FileWriter)Close(){
+func (w *FileWriter) Close() {
 	for _, wfp := range w.wfps {
 		if wfp != nil {
 			_ = wfp.Flush()
@@ -72,4 +72,3 @@ func (w *FileWriter)Close(){
 		}
 	}
 }
-

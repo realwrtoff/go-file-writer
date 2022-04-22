@@ -4,22 +4,22 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis"
+	"github.com/hatlonely/go-kit/logger"
 	"github.com/realwrtoff/go-file-writer/internal/parser"
 	"github.com/realwrtoff/go-file-writer/internal/reader"
 	"github.com/realwrtoff/go-file-writer/internal/writer"
-	"github.com/sirupsen/logrus"
 	"sync"
 )
 
 type Frame struct {
-	index int
-	runType string
-	filePath string
-	rds *redis.Client
+	index      int
+	runType    string
+	filePath   string
+	rds        *redis.Client
 	publisher  *reader.RdsReader
 	analyzer   *parser.Parser
 	subscriber *writer.FileWriter
-	runLog *logrus.Logger
+	runLog     *logger.Logger
 }
 
 func NewFrame(
@@ -27,7 +27,7 @@ func NewFrame(
 	runType string,
 	filePath string,
 	rds *redis.Client,
-	runLog *logrus.Logger) *Frame {
+	runLog *logger.Logger) *Frame {
 	queue := fmt.Sprintf("%s:%d", runType, index)
 	publisher := reader.NewRdsReader(queue, rds, runLog)
 	analyzer := parser.NewParser(runType, runLog)
@@ -45,7 +45,7 @@ func NewFrame(
 	}
 }
 
-func (f *Frame) Run(wg *sync.WaitGroup, ctx context.Context)  {
+func (f *Frame) Run(wg *sync.WaitGroup, ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():

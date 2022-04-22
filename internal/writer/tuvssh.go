@@ -1,7 +1,7 @@
 package writer
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/hatlonely/go-kit/logger"
 )
 
 type TuvsshWriter struct {
@@ -10,14 +10,14 @@ type TuvsshWriter struct {
 
 func NewTuvsshWriter(
 	filePath string,
-	runLog *logrus.Logger,
+	runLog *logger.Logger,
 ) *TuvsshWriter {
 	return &TuvsshWriter{
 		FileWriter: NewFileWriter(filePath, runLog),
 	}
 }
 
-func (w *TuvsshWriter)WriteLine(fileName string, array []string) (err error) {
+func (w *TuvsshWriter) WriteLine(fileName string, array []string) (err error) {
 	for _, s := range array {
 		_, _ = w.wfps[fileName].WriteString(s)
 		_, _ = w.wfps[fileName].WriteString(",")

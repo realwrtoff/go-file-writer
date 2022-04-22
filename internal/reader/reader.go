@@ -2,31 +2,31 @@ package reader
 
 import (
 	"github.com/go-redis/redis"
-	"github.com/sirupsen/logrus"
+	"github.com/hatlonely/go-kit/logger"
 )
 
-type ReaderInterface interface {
+type InterfaceReader interface {
 	ReadLine() string
 }
 
 type RdsReader struct {
-	queue string
-	rds *redis.Client
-	runLog *logrus.Logger
+	queue  string
+	rds    *redis.Client
+	runLog *logger.Logger
 }
 
 func NewRdsReader(
 	queue string,
 	rds *redis.Client,
-	runLog *logrus.Logger,
+	runLog *logger.Logger,
 ) *RdsReader {
 	return &RdsReader{
-		queue: queue,
+		queue:  queue,
 		rds:    rds,
 		runLog: runLog,
 	}
 }
 
-func (r *RdsReader)ReadLine() (string, error) {
+func (r *RdsReader) ReadLine() (string, error) {
 	return r.rds.LPop(r.queue).Result()
 }

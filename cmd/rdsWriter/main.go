@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis"
-	"github.com/hpifu/go-kit/hconf"
+	"github.com/hatlonely/go-kit/config"
+	"github.com/hatlonely/go-kit/flag"
+	"github.com/hatlonely/go-kit/logger"
+	"github.com/hatlonely/go-kit/refx"
 	"github.com/hpifu/go-kit/henv"
-	"github.com/hpifu/go-kit/hflag"
 	"github.com/hpifu/go-kit/hrule"
-	"github.com/hpifu/go-kit/logger"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/realwrtoff/go-file-writer/internal/handler"
 	"github.com/realwrtoff/go-file-writer/internal/scheduler"
 	"os"
@@ -22,29 +22,22 @@ import (
 var AppVersion = "unknown"
 
 type Options struct {
-	RunType string `hflag:"--type; usage: 运行类型" hrule:"atLeast 1"`
-	FilePath string `hflag:"--path; usage: 文件路径; default: ./data"`
-	Offset   int `hflag:"--offset; usage: 偏移量; default: 0"`
-	Num   int `hflag:"--num; usage: 并发数; default: 10"`
-	Redis struct {
-		Addr     string `hflag:"usage: redis addr" hrule:"atLeast 10"`
-		Password string `hflag:"usage: redis password"`
+	RunType  string `flag:"--type; usage: 运行类型"`
+	FilePath string `flag:"--path; usage: 文件路径; default: ./data"`
+	Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
+	Num      int    `flag:"--num; usage: 并发数; default: 10"`
+	Redis    struct {
+		Addr     string `flag:"usage: redis addr"`
+		Password string `flag:"usage: redis password"`
 	}
 	Logger struct {
 		Run logger.Options
 	}
 }
 
-
 func main() {
-	version := hflag.Bool("v", false, "print current version")
-	configfile := hflag.String("c", "configs/server.json", "config file path")
-	if err := hflag.Bind(&Options{}); err != nil {
-		panic(err)
-	}
-	if err := hflag.Parse(); err != nil {
-		panic(err)
-	}
+	version := flag.Bool("v", false, "print current version")
+	configfile := flag.String("c", "configs/server.json", "config file path")
 	if *version {
 		fmt.Println(AppVersion)
 		os.Exit(0)
@@ -52,24 +45,28 @@ func main() {
 
 	// load config
 	options := &Options{}
-	config, err := hconf.New("json", "local", *configfile)
+	cfg, err := config.NewConfigWithSimpleFile(*configfile)
 	if err != nil {
 		panic(err)
 	}
-	if err := config.Unmarshal(options); err != nil {
+	if err := cfg.Unmarshal(options, refx.WithCamelName()); err != nil {
 		panic(err)
 	}
 	if err := henv.NewHEnv("SERV").Unmarshal(options); err != nil {
 		panic(err)
 	}
-	if err := hflag.Unmarshal(options); err != nil {
-		panic(err)
-	}
+
 	if err := hrule.Evaluate(options); err != nil {
 		panic(err)
 	}
+	if err := flag.Struct(options, refx.WithCamelName()); err != nil {
+		panic(err)
+	}
+	if err := flag.Parse(); err != nil {
+		panic(err)
+	}
 
-	runLog, err := logger.NewLogger(&options.Logger.Run)
+	runLog, err := logger.NewLoggerWithOptions(&options.Logger.Run, refx.WithCamelName())
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +89,7 @@ func main() {
 	go watcher.Run(ctx)
 
 	var wg sync.WaitGroup //定义一个同步等待的组
-	for i:=0; i< options.Num; i++ {
+	for i := 0; i < options.Num; i++ {
 		index := options.Offset + i
 		hd := handler.NewFrame(index, options.RunType, options.FilePath, rds, runLog)
 		wg.Add(1)
@@ -108,5 +105,5 @@ func main() {
 	cancel()
 	wg.Wait()
 	_ = rds.Close()
-	_ = runLog.Out.(*rotatelogs.RotateLogs).Close()
+	_ = runLog.Close()
 }
