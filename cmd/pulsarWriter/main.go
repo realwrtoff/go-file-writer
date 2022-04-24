@@ -66,8 +66,6 @@ func main() {
 	fmt.Println(options)
 	ctx, cancel := context.WithCancel(context.Background())
 
-
-
 	//定义一个同步等待的组
 	var wg sync.WaitGroup
 	for i := 0; i < options.Service.Num; i++ {
