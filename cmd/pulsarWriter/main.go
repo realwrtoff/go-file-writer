@@ -29,7 +29,7 @@ type Options struct {
 	Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
 	Num      int    `flag:"--num; usage: 并发数; default: 10"`
 
-	Pulsar    struct {
+	Pulsar struct {
 		URL string `flag:"usage: pulsar url"`
 	}
 	Logger struct {
@@ -53,7 +53,7 @@ func main() {
 	if options.ConfigPath == "" {
 		options.ConfigPath = "config/base.json"
 	}
-	cfg, err := config.NewConfigWithBaseFile(options.ConfigPath, refx.WithCamelName())
+	cfg, err := config.NewConfigWithSimpleFile(options.ConfigPath)
 	refx.Must(err)
 	refx.Must(bind.Bind(&options, []bind.Getter{flag.Instance(),
 		bind.NewEnvGetter(bind.WithEnvPrefix("GO")), cfg}, refx.WithCamelName()))
