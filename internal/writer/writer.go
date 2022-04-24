@@ -3,6 +3,7 @@ package writer
 import (
 	"bufio"
 	"github.com/hatlonely/go-kit/logger"
+	"github.com/realwrtoff/go-file-writer/internal/public"
 	"os"
 )
 
@@ -52,6 +53,10 @@ func (w *FileWriter) Write(keyArray []string, buffArray []string) (err error) {
 		return nil
 	}
 	fileName := w.GetFileName(keyArray)
+	err = public.CheckCreatePath(fileName)
+	if err != nil {
+		return err
+	}
 	if _, ok := w.wfps[fileName]; !ok {
 		w.runLog.Infof("Open new file %s\n", fileName)
 		file, err := os.OpenFile(fileName, os.O_APPEND, 0666)

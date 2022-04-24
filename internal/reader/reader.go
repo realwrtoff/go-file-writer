@@ -21,6 +21,7 @@ func NewRdsReader(
 	rds *redis.Client,
 	runLog *logger.Logger,
 ) *RdsReader {
+	runLog.Infof("New redis reader for queue[%s]\n", queue)
 	return &RdsReader{
 		queue:  queue,
 		rds:    rds,
