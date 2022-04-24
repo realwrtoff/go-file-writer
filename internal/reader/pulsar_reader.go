@@ -45,5 +45,6 @@ func (r *PulsarReader) ReadLine() (string, error) {
 }
 
 func (r *PulsarReader) Close() {
+	_ = r.consumer.Unsubscribe()
 	r.consumer.Close()
 }

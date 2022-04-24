@@ -24,11 +24,12 @@ var Version string
 
 type Options struct {
 	flag.Options
-
-	RunType  string `flag:"--type; usage: 运行类型"`
-	FilePath string `flag:"--path; usage: 文件路径; default: ./data"`
-	Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
-	Num      int    `flag:"--num; usage: 并发数; default: 10"`
+	Service struct{
+		RunType  string `flag:"--runType; usage: 运行类型"`
+		FilePath string `flag:"--filePath; usage: 文件路径; default: ./data"`
+		Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
+		Num      int    `flag:"--num; usage: 并发数; default: 10"`
+	}
 	Redis    struct {
 		Addr     string `flag:"usage: redis addr"`
 		Password string `flag:"usage: redis password"`
@@ -69,7 +70,7 @@ func main() {
 		Password:     options.Redis.Password,
 		MaxRetries:   3,
 		MinIdleConns: 1,
-		PoolSize:     options.Num,
+		PoolSize:     options.Service.Num,
 	})
 	if _, err := rds.Ping().Result(); err != nil {
 		panic(err)
@@ -82,14 +83,14 @@ func main() {
 	go watcher.Run(ctx)
 
 	var wg sync.WaitGroup //定义一个同步等待的组
-	for i := 0; i < options.Num; i++ {
-		index := options.Offset + i
-		queue := fmt.Sprintf("%s:%d", options.RunType, index)
+	for i := 0; i < options.Service.Num; i++ {
+		index := options.Service.Offset + i
+		queue := fmt.Sprintf("%s:%d", options.Service.RunType, index)
 		publisher := reader.NewRdsReader(queue, rds, runLog)
-		analyzer := parser.NewParser(options.RunType, runLog)
-		filePrefix := fmt.Sprintf("%s/%s/%d_", options.FilePath, options.RunType, index)
+		analyzer := parser.NewParser(options.Service.RunType, runLog)
+		filePrefix := fmt.Sprintf("%s/%s/%d_", options.Service.FilePath, options.Service.RunType, index)
 		subscriber := writer.NewFileWriter(filePrefix, runLog)
-		hd := handler.NewFrameHandler(index, options.RunType, publisher, analyzer, subscriber, runLog)
+		hd := handler.NewFrameHandler(index, options.Service.RunType, publisher, analyzer, subscriber, runLog)
 		wg.Add(1)
 		go hd.Run(&wg, ctx)
 	}

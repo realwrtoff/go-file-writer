@@ -1,8 +1,10 @@
 {
-    "type": "tuvssh",
-    "path": "./data",
-    "offset": 0,
-    "num": 10,
+    "service": {
+        "runType": "tuvssh",
+        "filePath": "./data",
+        "offset": 0,
+        "num": 10
+    },
     "pulsar": {
         "url": "pulsar://localhost:6650"
     },
