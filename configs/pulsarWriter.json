@@ -11,7 +11,7 @@
             "level": "Info",
             "writers": [{
                 "type": "RotateFile",
-                "rotateFileWriter": {
+                "options": {
                     "filename": "log/run.log",
                     "maxAge": "24h",
                     "formatter": {
