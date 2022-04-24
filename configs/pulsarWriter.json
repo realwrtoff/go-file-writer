@@ -7,18 +7,16 @@
         "url": "pulsar://localhost:6650"
     },
     "logger": {
-        "info": {
-            "level": "Info",
-            "writers": [{
-                "type": "RotateFile",
-                "rotateFileWriter": {
-                    "filename": "log/run.log",
-                    "maxAge": "24h",
-                    "formatter": {
-                        "type": "txt"
-                    }
+        "level": "Info",
+        "writers": [{
+            "type": "RotateFile",
+            "rotateFileWriter": {
+                "filename": "log/run.log",
+                "maxAge": "24h",
+                "formatter": {
+                    "type": "txt"
                 }
-            }]
-        }
+            }
+        }]
     }
 }

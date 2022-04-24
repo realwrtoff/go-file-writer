@@ -17,7 +17,7 @@ export BUILD_VERSION
 
 .PHONY: build
 build: cmd/pulsarWriter/main.go $(wildcard internal/*/*.go) Makefile vendor
-	mkdir -p build/bin && mkdir -p build/config
+	mkdir -p build/bin && mkdir -p build/config && cp configs/pulsarWriter.json build/config
 	go build -ldflags "-X 'main.Version=$$BUILD_VERSION'" -o build/bin/${NAME} cmd/pulsarWriter/main.go
 
 .PHONY: clean
