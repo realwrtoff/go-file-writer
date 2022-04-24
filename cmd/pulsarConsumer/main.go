@@ -28,7 +28,7 @@ type Options struct {
 func Run(topic string, client *pulsar.Client, wg *sync.WaitGroup, ctx context.Context) {
 	consumer, err := (*client).Subscribe(pulsar.ConsumerOptions{
 		Topic:            topic,
-		SubscriptionName: "goConsumer",
+		SubscriptionName: "goSubConsumer",
 		Type:             pulsar.Shared,
 	})
 	if err != nil {

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"github.com/go-redis/redis"
 	"github.com/hatlonely/go-kit/logger"
 	"github.com/realwrtoff/go-file-writer/internal/parser"
 	"github.com/realwrtoff/go-file-writer/internal/reader"
@@ -52,16 +51,21 @@ func (f *FrameHandler) Run(wg *sync.WaitGroup, ctx context.Context) {
 
 		line, err := f.publisher.ReadLine()
 		if err != nil {
-			if err == redis.Nil {
-				time.Sleep(time.Second)
-			} else {
-				f.runLog.Error(err.Error())
-			}
+			f.runLog.Error(err.Error())
+			continue
+		}
+		// 取到的消息为空
+		if len(line) == 0 {
+			time.Sleep(time.Second)
 			continue
 		}
 		keyArray, buffArray, err := f.analyzer.Parse(line)
 		if err != nil {
 			f.runLog.Error(err.Error())
+			continue
+		}
+		// 解析的信息有误，直接丢弃
+		if len(buffArray) == 0 {
 			continue
 		}
 		err = f.subscriber.Write(keyArray, buffArray)

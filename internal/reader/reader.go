@@ -30,7 +30,11 @@ func NewRdsReader(
 }
 
 func (r *RdsReader) ReadLine() (string, error) {
-	return r.rds.LPop(r.queue).Result()
+	msg, err := r.rds.LPop(r.queue).Result()
+	if err == redis.Nil {
+		return "", err
+	}
+	return msg, err
 }
 
 func (r *RdsReader) Close() {

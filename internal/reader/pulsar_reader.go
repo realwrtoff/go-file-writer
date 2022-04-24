@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/hatlonely/go-kit/logger"
+	"time"
 )
 
 type PulsarReader struct {
@@ -33,7 +34,12 @@ func NewPulsarReader(
 }
 
 func (r *PulsarReader) ReadLine() (string, error) {
-	msg, err := r.consumer.Receive(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	msg, err := r.consumer.Receive(ctx)
+	if err == context.DeadlineExceeded {
+		return "", nil
+	}
 	r.consumer.Ack(msg)
 	return string(msg.Payload()), err
 }

@@ -18,6 +18,7 @@ type FileWriter struct {
 	filePath string
 	files    map[string]*os.File
 	wfps     map[string]*bufio.Writer
+	fpsCount map[string]int
 	runLog   *logger.Logger
 }
 
@@ -27,10 +28,12 @@ func NewFileWriter(
 ) *FileWriter {
 	files := make(map[string]*os.File)
 	wfps := make(map[string]*bufio.Writer)
+	fpsCount := make(map[string]int)
 	return &FileWriter{
 		filePath: filePath,
 		files:    files,
 		wfps:     wfps,
+		fpsCount: fpsCount,
 		runLog:   runLog,
 	}
 }
@@ -66,6 +69,7 @@ func (w *FileWriter) Write(keyArray []string, buffArray []string) (err error) {
 		wfp := bufio.NewWriter(file)
 		w.files[fileName] = file
 		w.wfps[fileName] = wfp
+		w.fpsCount[fileName] = 0
 	}
 	return w.WriteLine(fileName, buffArray)
 }
@@ -76,6 +80,10 @@ func (w *FileWriter) WriteLine(fileName string, array []string) (err error) {
 		_, _ = w.wfps[fileName].WriteString(",")
 	}
 	_, err = w.wfps[fileName].WriteString("\n")
+	w.fpsCount[fileName] += 1
+	if w.fpsCount[fileName]%10000 == 0 {
+		err = w.wfps[fileName].Flush()
+	}
 	return
 }
 

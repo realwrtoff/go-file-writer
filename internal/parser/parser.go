@@ -36,7 +36,14 @@ func (p *Parser) Parse(line string) (keyArray []string, buffArray []string, err 
 		}
 		tsStr := strconv.FormatInt(ts*1000, 64)
 		keyArray = append(keyArray, dataArray[1])
-		buffArray = append(buffArray, tsStr, dataArray[3], dataArray[4])
+		buffArray = append(buffArray, tsStr)
+		for _, idx := range []int{3, 4} {
+			if dataArray[idx] == "nan" {
+				buffArray = append(buffArray, "Null")
+			} else {
+				buffArray = append(buffArray, dataArray[idx])
+			}
+		}
 	}
 	return keyArray, buffArray, err
 }
