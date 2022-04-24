@@ -23,7 +23,7 @@ var Version string
 
 type Options struct {
 	flag.Options
-	Service struct{
+	Service struct {
 		RunType  string `flag:"--runType; usage: 运行类型; default tuvssh"`
 		FilePath string `flag:"--filePath; usage: 文件路径; default: ./data"`
 		Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
@@ -66,17 +66,18 @@ func main() {
 	fmt.Println(options)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	pulsarClient, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL})
-	if err != nil {
-		panic(err)
-	}
+
 
 	//定义一个同步等待的组
 	var wg sync.WaitGroup
 	for i := 0; i < options.Service.Num; i++ {
 		index := options.Service.Offset + i
 		topic := fmt.Sprintf("%s:%d", options.Service.RunType, index)
-		publisher := reader.NewPulsarReader(topic, &pulsarClient, runLog)
+		pulsarClient, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL})
+		if err != nil {
+			panic(err)
+		}
+		publisher := reader.NewPulsarReader(topic, pulsarClient, runLog)
 		analyzer := parser.NewParser(options.Service.RunType, runLog)
 		subscriber := writer.NewFileWriter(options.Service.FilePath, runLog)
 		hd := handler.NewFrameHandler(index, options.Service.RunType, publisher, analyzer, subscriber, runLog)
@@ -92,6 +93,6 @@ func main() {
 
 	cancel()
 	wg.Wait()
-	pulsarClient.Close()
+	// pulsarClient.Close()
 	_ = runLog.Close()
 }

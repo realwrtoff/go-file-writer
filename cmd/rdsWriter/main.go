@@ -24,13 +24,13 @@ var Version string
 
 type Options struct {
 	flag.Options
-	Service struct{
+	Service struct {
 		RunType  string `flag:"--runType; usage: 运行类型"`
 		FilePath string `flag:"--filePath; usage: 文件路径; default: ./data"`
 		Offset   int    `flag:"--offset; usage: 偏移量; default: 0"`
 		Num      int    `flag:"--num; usage: 并发数; default: 10"`
 	}
-	Redis    struct {
+	Redis struct {
 		Addr     string `flag:"usage: redis addr"`
 		Password string `flag:"usage: redis password"`
 	}
