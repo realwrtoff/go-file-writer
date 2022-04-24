@@ -18,6 +18,7 @@ func NewPulsarReader(
 	client pulsar.Client,
 	runLog *logger.Logger,
 ) *PulsarReader {
+	runLog.Infof("New pulsar reader for topic[%s]\n", queue)
 	consumer, _ := client.Subscribe(pulsar.ConsumerOptions{
 		Topic:            queue,
 		SubscriptionName: "goSubConsumer",
