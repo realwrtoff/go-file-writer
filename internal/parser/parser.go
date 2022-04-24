@@ -32,13 +32,13 @@ func (p *Parser) Parse(line string) (keyArray []string, buffArray []string, err 
 		dataArray := strings.Split(line, ",")
 		ts, err := strconv.ParseInt(dataArray[2], 10, 64)
 		if err != nil {
-			return
+			return keyArray, buffArray, err
 		}
 		tsStr := strconv.FormatInt(ts*1000, 64)
 		keyArray = append(keyArray, dataArray[1])
 		buffArray = append(buffArray, tsStr, dataArray[3], dataArray[4])
 	}
-	return
+	return keyArray, buffArray, err
 }
 
 func (p *Parser) Close() {
