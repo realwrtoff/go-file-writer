@@ -8,18 +8,18 @@ import (
 
 type PulsarReader struct {
 	queue    string
-	client   pulsar.Client
+	client   *pulsar.Client
 	consumer pulsar.Consumer
 	runLog   *logger.Logger
 }
 
 func NewPulsarReader(
 	queue string,
-	client pulsar.Client,
+	client *pulsar.Client,
 	runLog *logger.Logger,
 ) *PulsarReader {
 	runLog.Infof("New pulsar reader for topic[%s]\n", queue)
-	consumer, _ := client.Subscribe(pulsar.ConsumerOptions{
+	consumer, _ := (*client).Subscribe(pulsar.ConsumerOptions{
 		Topic:            queue,
 		SubscriptionName: "goSubConsumer",
 		Type:             pulsar.Shared,
@@ -40,5 +40,4 @@ func (r *PulsarReader) ReadLine() (string, error) {
 
 func (r *PulsarReader) Close() {
 	r.consumer.Close()
-	r.client.Close()
 }

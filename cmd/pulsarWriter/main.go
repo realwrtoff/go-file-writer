@@ -65,16 +65,17 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
+	pulsarClient, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL})
+	if err != nil {
+		panic(err)
+	}
+
 	//定义一个同步等待的组
 	var wg sync.WaitGroup
 	for i := 0; i < options.Num; i++ {
 		index := options.Offset + i
-		client, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL})
-		if err != nil {
-			panic(err)
-		}
 		topic := fmt.Sprintf("%s:%d", options.RunType, index)
-		publisher := reader.NewPulsarReader(topic, client, runLog)
+		publisher := reader.NewPulsarReader(topic, &pulsarClient, runLog)
 		analyzer := parser.NewParser(options.RunType, runLog)
 		subscriber := writer.NewFileWriter(options.FilePath, runLog)
 		hd := handler.NewFrameHandler(index, options.RunType, publisher, analyzer, subscriber, runLog)
@@ -90,5 +91,6 @@ func main() {
 
 	cancel()
 	wg.Wait()
+	pulsarClient.Close()
 	_ = runLog.Close()
 }
