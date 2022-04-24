@@ -2,6 +2,7 @@ package parser
 
 import (
 	"github.com/hatlonely/go-kit/logger"
+	"strconv"
 	"strings"
 )
 
@@ -27,8 +28,15 @@ func NewParser(
 
 func (p *Parser) Parse(line string) (keyArray []string, buffArray []string, err error) {
 	if p.fileType == "tuvssh" {
-		buffArray = strings.Split(line, "\t")
-		keyArray = append(keyArray, buffArray[0], buffArray[1], buffArray[2])
+		// 经度下标，纬度下标，时间戳，海水高度，海水温度
+		dataArray := strings.Split(line, ",")
+		ts, err := strconv.ParseInt(dataArray[2], 10, 64)
+		if err != nil {
+			return
+		}
+		tsStr := strconv.FormatInt(ts*1000, 64)
+		keyArray = append(keyArray, dataArray[1])
+		buffArray = append(buffArray, tsStr, dataArray[3], dataArray[4])
 	}
 	return
 }

@@ -67,7 +67,7 @@ func (w *FileWriter) Write(keyArray []string, buffArray []string) (err error) {
 func (w *FileWriter) WriteLine(fileName string, array []string) (err error) {
 	for _, s := range array {
 		_, _ = w.wfps[fileName].WriteString(s)
-		_, _ = w.wfps[fileName].WriteString("\t")
+		_, _ = w.wfps[fileName].WriteString(",")
 	}
 	_, err = w.wfps[fileName].WriteString("\n")
 	return
