@@ -21,8 +21,8 @@ type FrameHandler struct {
 func NewFrameHandler(
 	index int,
 	runType string,
-	publisher  reader.InterfaceReader,
-	analyzer   parser.InterfaceParser,
+	publisher reader.InterfaceReader,
+	analyzer parser.InterfaceParser,
 	subscriber writer.InterfaceWriter,
 	runLog *logger.Logger) *FrameHandler {
 	return &FrameHandler{

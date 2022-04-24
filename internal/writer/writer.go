@@ -7,7 +7,7 @@ import (
 )
 
 type InterfaceWriter interface {
-	GetFileName([] string) string
+	GetFileName([]string) string
 	Write([]string, []string) error
 	WriteLine(string, []string) error
 	Close()
@@ -34,7 +34,7 @@ func NewFileWriter(
 	}
 }
 
-func (w *FileWriter) GetFileName(arrays[] string) string {
+func (w *FileWriter) GetFileName(arrays []string) string {
 	if len(arrays) == 0 {
 		return w.filePath
 	}

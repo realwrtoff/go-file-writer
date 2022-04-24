@@ -7,10 +7,10 @@ import (
 )
 
 type PulsarReader struct {
-	queue  string
-	client    pulsar.Client
+	queue    string
+	client   pulsar.Client
 	consumer pulsar.Consumer
-	runLog *logger.Logger
+	runLog   *logger.Logger
 }
 
 func NewPulsarReader(
@@ -24,10 +24,10 @@ func NewPulsarReader(
 		Type:             pulsar.Shared,
 	})
 	return &PulsarReader{
-		queue:  queue,
-		client:    client,
+		queue:    queue,
+		client:   client,
 		consumer: consumer,
-		runLog: runLog,
+		runLog:   runLog,
 	}
 }
 
