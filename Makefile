@@ -20,6 +20,11 @@ build: cmd/pulsarWriter/main.go $(wildcard internal/*/*.go) Makefile vendor
 	mkdir -p build/bin && mkdir -p build/config && cp configs/pulsarWriter.json build/config
 	go build -ldflags "-X 'main.Version=$$BUILD_VERSION'" -o build/bin/${NAME} cmd/pulsarWriter/main.go
 
+.PHONY: rds
+rds: cmd/rdsWriter/main.go $(wildcard internal/*/*.go) Makefile vendor
+	mkdir -p build/bin && mkdir -p build/config && cp configs/rdsWriter.json build/config
+	go build -ldflags "-X 'main.Version=$$BUILD_VERSION'" -o build/bin/${NAME} cmd/rdsWriter/main.go
+
 .PHONY: clean
 clean:
 	rm -rf build
