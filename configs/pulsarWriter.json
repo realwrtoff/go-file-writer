@@ -15,7 +15,7 @@
                     "filename": "log/run.log",
                     "maxAge": "24h",
                     "formatter": {
-                        "type": "txt"
+                        "type": "text"
                     }
                 }
             }]

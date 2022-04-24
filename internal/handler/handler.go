@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"github.com/go-redis/redis"
 	"github.com/hatlonely/go-kit/logger"
 	"github.com/realwrtoff/go-file-writer/internal/parser"
 	"github.com/realwrtoff/go-file-writer/internal/reader"
 	"github.com/realwrtoff/go-file-writer/internal/writer"
 	"sync"
+	"time"
 )
 
 type FrameHandler struct {
@@ -50,8 +52,11 @@ func (f *FrameHandler) Run(wg *sync.WaitGroup, ctx context.Context) {
 
 		line, err := f.publisher.ReadLine()
 		if err != nil {
-			f.runLog.Error(err.Error())
-			// time.Sleep(time.Second)
+			if err == redis.Nil {
+				time.Sleep(time.Second)
+			} else {
+				f.runLog.Error(err.Error())
+			}
 			continue
 		}
 		keyArray, buffArray, err := f.analyzer.Parse(line)
