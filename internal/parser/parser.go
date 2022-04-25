@@ -34,7 +34,7 @@ func (p *Parser) Parse(line string) (keyArray []string, buffArray []string, err 
 		if err != nil {
 			return keyArray, buffArray, err
 		}
-		tsStr := strconv.FormatInt(ts*1000, 64)
+		tsStr := strconv.FormatInt(ts*1000, 10)
 		keyArray = append(keyArray, dataArray[1])
 		buffArray = append(buffArray, tsStr)
 		for _, idx := range []int{3, 4} {
