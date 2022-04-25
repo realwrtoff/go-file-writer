@@ -40,7 +40,7 @@ func NewFileWriter(
 
 func (w *FileWriter) GetFileName(arrays []string) string {
 	if len(arrays) == 0 {
-		return w.filePath
+		return w.filePath + ".txt"
 	}
 	fileName := w.filePath
 	for _, k := range arrays {
