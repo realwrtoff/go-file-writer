@@ -64,6 +64,11 @@ func main() {
 	}
 
 	fmt.Println(options)
+	pulsarClient, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL, MaxConnectionsPerBroker: 10})
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	//定义一个同步等待的组
@@ -71,10 +76,6 @@ func main() {
 	for i := 0; i < options.Service.Num; i++ {
 		index := options.Service.Offset + i
 		topic := fmt.Sprintf("%s:%d", options.Service.RunType, index)
-		pulsarClient, err := pulsar.NewClient(pulsar.ClientOptions{URL: options.Pulsar.URL})
-		if err != nil {
-			panic(err)
-		}
 		publisher := reader.NewPulsarReader(topic, pulsarClient, runLog)
 		analyzer := parser.NewParser(options.Service.RunType, runLog)
 		filePrefix := fmt.Sprintf("%s/%s/%d", options.Service.FilePath, options.Service.RunType, index)
