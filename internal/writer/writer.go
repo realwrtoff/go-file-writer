@@ -60,7 +60,7 @@ func (w *FileWriter) Write(keyArray []string, buffArray []string) (err error) {
 		return err
 	}
 	if _, ok := w.wfps[fileName]; !ok {
-		w.runLog.Infof("Open new file %s\n", fileName)
+		w.runLog.Infof("Open new file %s", fileName)
 		file, err := os.OpenFile(fileName, os.O_APPEND, 0666)
 		if err != nil {
 			return err

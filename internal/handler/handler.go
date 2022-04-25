@@ -43,7 +43,7 @@ func (f *FrameHandler) Run(wg *sync.WaitGroup, ctx context.Context) {
 			f.publisher.Close()
 			f.analyzer.Close()
 			f.subscriber.Close()
-			f.runLog.Infof("hander[%s][%d] exit...\n", f.runType, f.index)
+			f.runLog.Infof("hander[%s][%d] exit...", f.runType, f.index)
 			wg.Done()
 			return
 		default:
