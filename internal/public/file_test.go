@@ -1,7 +1,6 @@
 package public
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 )
@@ -13,6 +12,6 @@ func TestCheckFilePath(t *testing.T) {
 		t.Errorf(err.Error())
 	} else {
 		t.Logf(filepath.Dir(fileName))
-		_ = os.Remove(filepath.Dir(fileName))
+		//_ = os.Remove(filepath.Dir(fileName))
 	}
 }
