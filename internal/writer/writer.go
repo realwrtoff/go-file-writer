@@ -44,11 +44,10 @@ func (w *FileWriter) GetFileName(arrays []string) string {
 	}
 	fileName := w.filePath
 	for _, k := range arrays {
-		fileName += k
 		fileName += "_"
+		fileName += k
 	}
-	fileName = fileName[:len(fileName)-1] + ".txt"
-	return fileName
+	return fileName + ".txt"
 }
 
 func (w *FileWriter) Write(keyArray []string, buffArray []string) (err error) {

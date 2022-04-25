@@ -77,7 +77,8 @@ func main() {
 		}
 		publisher := reader.NewPulsarReader(topic, pulsarClient, runLog)
 		analyzer := parser.NewParser(options.Service.RunType, runLog)
-		subscriber := writer.NewFileWriter(options.Service.FilePath, runLog)
+		filePrefix := fmt.Sprintf("%s/%s/%d", options.Service.FilePath, options.Service.RunType, index)
+		subscriber := writer.NewFileWriter(filePrefix, runLog)
 		hd := handler.NewFrameHandler(index, options.Service.RunType, publisher, analyzer, subscriber, runLog)
 		wg.Add(1)
 		go hd.Run(&wg, ctx)
